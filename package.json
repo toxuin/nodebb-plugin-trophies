@@ -1,0 +1,33 @@
+{
+  "name": "nodebb-plugin-trophies",
+  "version": "0.0.1",
+  "description": "Trophies for users of NodeBB",
+  "main": "library.js",
+  "minver": "0.9.2",
+  "scripts": {
+    "test": "no."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toxuin/nodebb-plugin-trophies"
+  },
+  "keywords": [
+    "nodebb",
+    "plugin",
+    "trophies",
+    "badges",
+    "achievements",
+    "rewards"
+  ],
+  "author": {
+    "name": "toxuin"
+  },
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/toxuin/nodebb-plugin-trophies/issues"
+  },
+  "homepage": "https://github.com/toxuin/nodebb-plugin-trophies",
+  "nbbpm": {
+    "compatibility": "^0.9.0"
+  }
+}

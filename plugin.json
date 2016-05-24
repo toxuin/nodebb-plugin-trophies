@@ -1,0 +1,21 @@
+{
+	"id": "nodebb-plugin-trophies",
+	"name": "Trophies",
+	"description": "Plugin for giving users a Trophy",
+	"url": "https://github.com/toxuin/nodebb-plugin-trophies",
+	"library": "./index.js",
+	"hooks": [
+		{"hook": "static:app.load", "method": "onLoad"},
+		{"hook": "filter:admin.header.build", "method": "addAdminNavigation"},
+		{"hook": "filter:widgets.getWidgets", "method": "defineWidgets"},
+		{"hook": "filter:widget.render:trophies", "method": "renderTrophiesWidget"}
+	],
+	"staticDirs": {
+		"static": "./static"
+	},
+	"templates": "./static/templates",
+	"less": [
+		"./less/style.less"
+	],
+	"compatibility": "^0.9.0"
+}
