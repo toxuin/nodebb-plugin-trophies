@@ -18,7 +18,7 @@ var Trophies = {};
 Trophies.onLoad = function(application, callback) {
 	application.router.get('/admin/plugins/trophies', application.middleware.admin.buildHeader, renderAdmin);
 	application.router.get('/api/admin/plugins/trophies', renderAdmin);
-	application.router.get('/api/plugins/trophies/:username', renderJSON);
+	application.router.get('/api/plugins/trophies/:userslug', renderJSON);
 
 	SocketPlugins.Trophies = {
 		createTrophy: Trophies.createTrophy,
@@ -56,9 +56,10 @@ Trophies.defineWidgets = function(widgets, callback) {
 
 Trophies.renderTrophiesWidget = function(widget, callback) {
         if (!widget || !widget.area || !widget.area.url || !widget.area.url.startsWith("user/")) return callback();
-		var username = widget.area.url.replace("user/", "");
-		getTrophiesForUsername(username, function(err, trophies) {
+		var userslug = widget.area.url.replace("user/", "");
+		getTrophiesForUserslug(userslug, function(err, trophies) {
 			if (!err) app.render('widgets/trophies', {trophies: trophies}, callback);
+			else console.log(err);
 		});
 };
 
@@ -112,7 +113,7 @@ Trophies.deleteTrophy = function(socket, data, callback) {
 
 Trophies.awardTrophy = function(socket, data, callback) {
 	// SAMPLE DATA: { trophy: 14, user: 'toxuin', steal: true }
-	user.getUidByUsername(data.user, function(err, uid) {
+	user.getUidByUserslug(data.user, function(err, uid) {
 		if (err) return callback(err);
 		if (!uid) return callback(new Error("No such user!"));
 		if (!data.trophy) return callback(new Error("Trophy not found!"));
@@ -177,17 +178,17 @@ function renderAdmin(req, res, next) {
 }
 
 function renderJSON(request, response, callback) {
-	if (!request.params || !request.params.username) response.json({error: "No username specified"});
-	var username = request.params.username;
+	if (!request.params || !request.params.userslug) response.json({error: "No userslug specified"});
+	var userslug = request.params.userslug;
 
-	getTrophiesForUsername(username, function(err, trophies) {
+	getTrophiesForUserslug(userslug, function(err, trophies) {
 		if (err) response.json({error: err});
 		else response.json(trophies);
 	});
 }
 
-function getTrophiesForUsername(username, callback) {
-	user.getUidByUsername(username, function(err, uid) {
+function getTrophiesForUserslug(userslug, callback) {
+	user.getUidByUserslug(userslug, function(err, uid) {
 		if (err) return callback(err);
 		if (!uid) return callback(new Error("User not found"));
 

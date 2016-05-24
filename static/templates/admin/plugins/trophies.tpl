@@ -143,7 +143,7 @@
 					}
 					var users = [];
 					results.users.forEach(function(item) {
-						users.push(item.username);
+						users.push(item.userslug);
 					});
 					response(users);
 				});
