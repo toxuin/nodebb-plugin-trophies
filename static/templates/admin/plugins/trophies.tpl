@@ -89,7 +89,7 @@
 				user: $("#trophies-award-user").val(),
 				steal: $("#steal-from-others").is(':checked')
 			};
-			socket.emit('plugins.Trophies.awardTrophy', data, function(err) {
+			socket.emit('admin.plugins.Trophies.awardTrophy', data, function(err) {
 				if (err && err.hasOwnProperty("message")) {
 					app.alertError("Error: " + err.message);
 				} else {
@@ -119,7 +119,7 @@
 				return false;
 			}
 
-			socket.emit('plugins.Trophies.createTrophy', data, function(err, result) {
+			socket.emit('admin.plugins.Trophies.createTrophy', data, function(err, result) {
 				if (err) {
 					console.log("Error on creating Trophy:");
 					console.log(err);
@@ -137,7 +137,7 @@
 		});
 
 		$('.trophies-delete').click(function(event) {
-			socket.emit('plugins.Trophies.deleteTrophy', $(this).data("trophiesid"), function(result) {
+			socket.emit('admin.plugins.Trophies.deleteTrophy', $(this).data("trophiesid"), function(result) {
 				app.alertSuccess("Deleted trophy.");
 				updateTrophyList();
 			});
@@ -163,7 +163,7 @@
 	});
 
 	function updateTrophyList() {
-		socket.emit('plugins.Trophies.getAllTrophies', null, function(err, results) {
+		socket.emit('admin.plugins.Trophies.getAllTrophies', null, function(err, results) {
 			if (err || !results) {
 				return app.alertError("Error occured! " + err?err:"");
 			}

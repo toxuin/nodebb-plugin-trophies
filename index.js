@@ -2,7 +2,7 @@
 var	user = module.parent.require('./user'),
 	utils = module.parent.require('../public/src/utils'),
 	templates = module.parent.require('./meta/templates.js'),
-	SocketPlugins = module.parent.require('./socket.io/plugins'),
+	SocketAdmin = module.parent.require('./socket.io/admin').plugins,
 	db = module.parent.require('./database'),
 	notifications = module.parent.require('./notifications'),
 	async = require('async'),
@@ -20,7 +20,7 @@ Trophies.onLoad = function(application, callback) {
 	application.router.get('/api/admin/plugins/trophies', renderAdmin);
 	application.router.get('/api/plugins/trophies/:userslug', renderJSON);
 
-	SocketPlugins.Trophies = {
+	SocketAdmin.Trophies = {
 		createTrophy: Trophies.createTrophy,
 		deleteTrophy: Trophies.deleteTrophy,
 		awardTrophy: Trophies.awardTrophy,
@@ -281,9 +281,9 @@ function parseAllLogs(callback) {
 			console.log(err);
 			return callback(err);
 		}
-
 		var logs = [];
-		async.each(logIds[0], function(logId, nextEach) {
+		logIds[0].reverse(); // DATE ASC DESC
+		async.eachSeries(logIds[0], function(logId, nextEach) {
 			db.getObject("trophy-plugin:log:" + logId, function(err, logObject) {
 				if (err) {
 					console.log(err);
@@ -296,7 +296,7 @@ function parseAllLogs(callback) {
 					function(nextSeries) {
 						user.getUserField(logObject.fromUserId, 'userslug', function(err, slug) {
 							if (err) slug = "id " + logObject.fromUserId;
-							logString += "User " + slug + " " + logObject.action + " trophy ";
+							logString += "User <a target=\"_blank\" href=\"/user/" + slug + "/\">" + slug + "</a> " + logObject.action + " trophy ";
 							nextSeries();
 						});
 					},
@@ -306,7 +306,7 @@ function parseAllLogs(callback) {
 							if (exists) {
 								db.getObjectField("trophy-plugin:trophy:" + logObject.trophyId, "name", function(err, trophyName) {
 									if (err) trophyName = "Unknown Trophy";
-									logString += "\"" + trophyName + "\" (ID " + logObject.trophyId + ")";
+									logString += "\"<b>" + trophyName + "</b>\" (ID " + logObject.trophyId + ")";
 								});
 							} else {
 								logString += "ID " + logObject.trophyId;
@@ -318,7 +318,7 @@ function parseAllLogs(callback) {
 						if (logObject.toUserId <= 0) return nextSeries();
 						user.getUserField(logObject.toUserId, 'userslug', function(err, slug) {
 							if (err) slug = "id " + logObject.toUserId;
-							logString += " to User " + slug;
+							logString += " to User <a target=\"_blank\" href=\"/user/" + slug + "/\">" + slug + "</a>";
 							nextSeries();
 						});
 					},
