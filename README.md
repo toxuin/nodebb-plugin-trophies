@@ -5,7 +5,7 @@ This plugin lets you create reward badges for your users and manually add them t
 
 It was developed for use on [Kamloops Makerspace website](http://kamloopsmakerspace.com/).
 
-Here's some picture to give you an idea what it is:
+Here's some pictures to give you an idea what it is:
 
 ![User side screenshot](README_DATA/trophies-screenshot.png)
 
@@ -15,7 +15,7 @@ And here's how it looks like on the admin side:
 
 Setup
 ---
-First, install it to your NodeBB instance. You can do it from the admin interface (once the plugin gets approved to be listed on the catalogue) or you can install it with
+First, install it to your NodeBB instance. You can do it from the admin interface or you can install it with
 
      npm install nodebb-plugin-trophies
 

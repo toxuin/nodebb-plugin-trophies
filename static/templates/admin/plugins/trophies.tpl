@@ -66,6 +66,17 @@
 			<!-- END trophies -->
 		</div>
 	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">Trophy award log</div>
+		<div class="panel-body" id="trophies-log-list">
+			<!-- BEGIN logs -->
+			<div class="trophies-log-item">
+				<span class="trophies-log-text">{logs.text}</span>
+			</div>
+			<!-- END logs -->
+		</div>
+	</div>
 </form>
 
 <script>

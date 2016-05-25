@@ -85,11 +85,14 @@ Trophies.createTrophy = function(socket, data, callback) {
 		};
 
 		async.parallel({
-			troId: function(callback) {
-				db.setObject("trophy-plugin:trophy:" + troId, trophy, callback(err, troId));
+			troId: function(next) {
+				db.setObject("trophy-plugin:trophy:" + troId, trophy, next(err, troId));
 			},
-			whatever : function(callback) {
-				db.setAdd("trophy-plugin:trophies", troId, callback(err, troId));
+			whatever : function(next) {
+				db.setAdd("trophy-plugin:trophies", troId, next(err, troId));
+			},
+			logging: function(next) {
+				logTrophyEvent(socket.uid, "created", troId, -1, next);
 			}
 		}, callback);
 
@@ -107,6 +110,9 @@ Trophies.deleteTrophy = function(socket, data, callback) {
 		},
 		function(next) {
 			db.delete("trophy-plugin:trophy:" + data, next);
+		},
+		function(next) {
+			logTrophyEvent(socket.uid, "deleted", data, -1, next);
 		}
 	], callback);
 }
@@ -130,6 +136,9 @@ Trophies.awardTrophy = function(socket, data, callback) {
 				} else {
 					db.setAdd("trophy-plugin:user:" + uid, data.trophy, next);
 				}
+			},
+			function(next) {
+				logTrophyEvent(socket.uid, "awarded" + (data.steal?" (stealing)":""), data.trophy, uid, next);
 			},
 			function(next) {
 				notifications.create({
@@ -171,6 +180,9 @@ function renderAdmin(req, res, next) {
 		},
 		trophies: function(callback) { // GET ALL TROPHIES FROM DB
 			getAllTrophies(callback);
+		},
+		logs: function(callback) {
+			parseAllLogs(callback);
 		}
 	}, function(err, result) {
 		res.render('admin/plugins/trophies', result);
@@ -230,16 +242,102 @@ function getAllTrophies(callback) {
 
 function deleteTrophyFromAllUsers(trophyId, callback) {
 	db.getSetMembers("trophy-plugin:users", function(err, users) {
-		async.each(users, function(user, roll) {
+		async.each(users, function(user, nextEach) {
 			db.setRemove("trophy-plugin:user:" + user, trophyId, function() {
 				db.setCount("trophy-plugin:user:" + user, function (err, result) {
 					if (result == 0) {
-						db.setRemove("trophy-plugin:users", user, roll);
-					} else roll();
+						db.setRemove("trophy-plugin:users", user, nextEach);
+					} else nextEach();
+				});
+			});
+		}, callback);
+	});
+}
+
+function logTrophyEvent(fromUserId, action, trophyId, toUserId, callback) {
+	var trophyEvent = {
+		fromUserId: fromUserId,
+		action: action,
+		trophyId: trophyId,
+		toUserId: toUserId
+	};
+
+	db.incrObjectField('global', 'nextTrophyLogId', function(err, logId) {
+		if (err) return callback(err);
+		async.parallel([
+			function(next) {
+				db.sortedSetAdd("trophy-plugin:logs", Date.now(), logId, next);
+			},
+			function(next) {
+				db.setObject("trophy-plugin:log:" + logId, trophyEvent, next);
+			}
+		], callback);
+	});
+}
+
+function parseAllLogs(callback) {
+	db.getSortedSetsMembers(['trophy-plugin:logs'], function(err, logIds) {
+		if (err) {
+			console.log(err);
+			return callback(err);
+		}
+
+		var logs = [];
+		async.each(logIds[0], function(logId, nextEach) {
+			db.getObject("trophy-plugin:log:" + logId, function(err, logObject) {
+				if (err) {
+					console.log(err);
+					return callback(err);
+				}
+
+				var logString = "";
+
+				async.series([
+					function(nextSeries) {
+						user.getUserField(logObject.fromUserId, 'userslug', function(err, slug) {
+							if (err) slug = "id " + logObject.fromUserId;
+							logString += "User " + slug + " " + logObject.action + " trophy ";
+							nextSeries();
+						});
+					},
+					function(nextSeries) {
+						db.isSetMember("trophy-plugin:trophies", logObject.trophyId, function(err, exists) {
+							if (err) exists = false;
+							if (exists) {
+								db.getObjectField("trophy-plugin:trophy:" + logObject.trophyId, "name", function(err, trophyName) {
+									if (err) trophyName = "Unknown Trophy";
+									logString += "\"" + trophyName + "\" (ID " + logObject.trophyId + ")";
+								});
+							} else {
+								logString += "ID " + logObject.trophyId;
+							}
+							nextSeries();
+						});
+					},
+					function(nextSeries) {
+						if (logObject.toUserId <= 0) return nextSeries();
+						user.getUserField(logObject.toUserId, 'userslug', function(err, slug) {
+							if (err) slug = "id " + logObject.toUserId;
+							logString += " to User " + slug;
+							nextSeries();
+						});
+					},
+					function(nextSeries) {
+						db.sortedSetScore("trophy-plugin:logs", logId, function(err, timestamp) {
+							if (err) timestamp = "???";
+							logString += " at " + utils.toISOString(timestamp);
+							nextSeries();
+						});
+					}
+				], function(err, result) {
+					logs.push({text: logString});
+					nextEach();
 				});
 
 			});
-		}, callback);
+		}, function(err) {
+			callback(err, logs);
+		});
 	});
 }
 
