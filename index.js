@@ -145,7 +145,7 @@ Trophies.awardTrophy = function(socket, data, callback) {
 					bodyShort: 'You just got a trophy!',
 					bodyLong: "Congratulations! You just got a new trophy!",
 					nid: 'trophy_' + uid + '_' + data.trophy,
-					from: 2,
+					from: 1,
 					path: '/user/' + data.user,
 				}, function(err, notification) {
 					if (!err && notification) {

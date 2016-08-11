@@ -1,7 +1,7 @@
 {
 	"id": "nodebb-plugin-trophies",
 	"name": "Trophies",
-	"description": "Plugin for giving users a Trophy",
+	"description": "Trophies: award badges on user profile pages. See Readme on how to install.",
 	"url": "https://github.com/toxuin/nodebb-plugin-trophies",
 	"library": "./index.js",
 	"hooks": [

@@ -39,11 +39,11 @@ Please fork and do stuff.
 License
 ------
 
-I'd love to switch to more liberal license, but since this thing is based off someone else's code, I have a file called LICENSE, go read.
+MIT Licence allows you to do almost whatever you can imagine with this software. I have a file called LICENSE, go read.
 
 Credits
 ------
 
-- This is my first plugin for NodeBB and I started off [psychobunny's badges plugin](https://github.com/psychobunny/nodebb-plugin-badges). I'd say it is loosely based on it. Thanks, psychobunny!
+- Thanks, psychobunny!
 
 - Default badge art generously contributed by Pablo Macuso
